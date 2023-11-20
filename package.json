@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "start-dev": "nodemon src/server.js",
-    "lint": "eslint ./"
+    "lint": "eslint ./src"
   },
   "keywords": [
     "REST",
@@ -21,7 +21,8 @@
   "author": "Wildan",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hapi": "^21.3.2"
+    "@hapi/hapi": "^21.3.2",
+    "nanoid": "^3.3.7"
   },
   "devDependencies": {
     "eslint": "^8.53.0",
