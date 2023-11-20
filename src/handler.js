@@ -164,7 +164,7 @@ const updateBookByIdHandler = (request, h) => {
         pageCount, 
         readPage, 
         reading 
-    } = request.body;
+    } = request.payload;
 
     // Jika client tidak melampirkan nama buku pada saat mengupdate, maka update gagal
     if(!name) {
@@ -186,33 +186,32 @@ const updateBookByIdHandler = (request, h) => {
         return response;
     }
 
-
-    if(!bookIndex) {
+    if(bookIndex !== -1) {
+        books[bookIndex] = {
+            ...books[bookIndex],
+            name,
+            year,
+            author,
+            summary, 
+            publisher,
+            pageCount,
+            readPage, 
+            reading,
+            updatedAt
+        }
+        
         const response = h.response({
-            status: "fail",
-            message: "Gagal memperbarui buku. Id tidak ditemukan"
-        }).code(404);
-
+            status: "success",
+            message: "Buku berhasil diperbarui"
+        }).code(200);
+    
         return response;
     }
 
-    books[bookIndex] = {
-        ...books[bookIndex],
-        name,
-        year,
-        author,
-        summary, 
-        publisher,
-        pageCount,
-        readPage, 
-        reading,
-        updatedAt
-    }
-    
     const response = h.response({
-        status: "success",
-        message: "Buku berhasil diperbarui"
-    }).code(200);
+        status: "fail",
+        message: "Gagal memperbarui buku. Id tidak ditemukan"
+    }).code(404);
 
     return response;
 }
