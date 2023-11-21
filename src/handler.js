@@ -101,10 +101,10 @@ const getAllBooksHandler = (request, h) => {
         const response = h.response({
             status: "success",
             data: {
-                books: filteredBooks.map((buku) => ({
-                    id: buku.id,
-                    name: buku.name,
-                    publisher: buku.publisher
+                books: filteredBooks.map((book) => ({
+                    id: book.id,
+                    name: book.name,
+                    publisher: book.publisher
                 }))
             }
         }).code(200);
@@ -237,6 +237,7 @@ const updateBookByIdHandler = (request, h) => {
     return response;
 }
 
+// DELETE : /books/{bookId}
 const deleteBookByIdHandler = (request, h) => {
     const { id } = request.params;
 
