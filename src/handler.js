@@ -5,14 +5,7 @@ const books = require('./books')
 // POST : /books
 const addBookHandler = (request, h) => {
     const {
-        name, 
-        year, 
-        author, 
-        summary, 
-        publisher, 
-        pageCount, 
-        readPage, 
-        reading 
+        name, year, author, summary, publisher, pageCount, readPage, reading 
     } = request.payload;
 
     const id = nanoid(16);
@@ -57,11 +50,6 @@ const addBookHandler = (request, h) => {
     books.push(newBook);
 
     const isSuccess = books.filter((book) => book.id === id).length > 0;
-    // const bookId = books.map(books => {
-    //     return {
-    //         id: books.id
-    //     }
-    // })
 
     if(!isSuccess) {
         const response = h.response({
@@ -85,26 +73,59 @@ const addBookHandler = (request, h) => {
 
 // GET : /books
 const getAllBooksHandler = (request, h) => {
-    // let filteredBooks = books.filter((book) => (book.bookId).length > 0);
-    // let mappedBooks = books.map(rawBook => ({
-    //         ...rawBook,
-    //         id: rawBook.bookId,
-    //         name: rawBook.name,
-    //         publisher: rawBook.publisher
-    // }));
+    let bookList = books;
+    const { name, reading, finished } = request.query;
 
-    const { name, reading, finished } = request.query; 
+    // Mengecek apakah ada properti name pada query parameter
+    if(name) {
+        const bookWithName = bookList.filter((book) => book.name.toLowerCase().includes(name.toLowerCase()));
 
-    let filteredBooks = books;
-    // filteredBooks.filter(book => book.finished === (finished === 1))
-
-    if(filteredBooks.length === 0 ) {
         const response = h.response({
             status: "success",
             data: {
-                books: []
+                books: bookWithName.map((book) => ({
+                    id: book.id,
+                    name: book.name,
+                    publisher: book.publisher
+                }))
+            },
+        }).code(200);
+
+        return response;
+    }
+
+    // Mengecek apakah terdapat properti reading pada query parameter
+    if(reading) {
+        const filteredBooks = bookList.filter((book) => Number(book.reading) === Number(reading));
+
+        const response = h.response({
+            status: "success",
+            data: {
+                books: filteredBooks.map((buku) => ({
+                    id: buku.id,
+                    name: buku.name,
+                    publisher: buku.publisher
+                }))
             }
-        });
+        }).code(200);
+
+        return response;
+    }
+
+    // Mengecek terdapat properi finished apakah pada query parameter
+    if(finished) {
+        const finishedBooks = bookList.filter((book) => Number(book.finished) === Number(finished));
+
+        const response = h.response({
+            status: "success",
+            data: {
+                books: finishedBooks.map((finishedBook) => ({
+                    id: finishedBook.id,
+                    name: finishedBook.name,
+                    publisher: finishedBook.publisher
+                }))
+            }
+        }).code(200);
 
         return response;
     }
@@ -112,7 +133,7 @@ const getAllBooksHandler = (request, h) => {
     const response = h.response({
         status: "success",
         data: {
-            books: filteredBooks.map(rawBook => ({
+            books: bookList.map(rawBook => ({
                 id: rawBook.id,
                 name: rawBook.name,
                 publisher: rawBook.publisher
@@ -186,32 +207,55 @@ const updateBookByIdHandler = (request, h) => {
         return response;
     }
 
-    if(bookIndex !== -1) {
-        books[bookIndex] = {
-            ...books[bookIndex],
-            name,
-            year,
-            author,
-            summary, 
-            publisher,
-            pageCount,
-            readPage, 
-            reading,
-            updatedAt
-        }
-        
+    if(bookIndex === -1) {
         const response = h.response({
-            status: "success",
-            message: "Buku berhasil diperbarui"
-        }).code(200);
-    
+            status: "fail",
+            message: "Gagal memperbarui buku. Id tidak ditemukan"
+        }).code(404);
+        
         return response;
     }
 
+    books[bookIndex] = {
+        ...books[bookIndex],
+        name,
+        year,
+        author,
+        summary, 
+        publisher,
+        pageCount,
+        readPage, 
+        reading,
+        updatedAt
+    }
+    
     const response = h.response({
-        status: "fail",
-        message: "Gagal memperbarui buku. Id tidak ditemukan"
-    }).code(404);
+        status: "success",
+        message: "Buku berhasil diperbarui"
+    }).code(200);
+
+    return response;
+}
+
+const deleteBookByIdHandler = (request, h) => {
+    const { id } = request.params;
+
+    const bookIndex = books.findIndex((book) => book.id === id);
+
+    if(bookIndex === -1) {
+        const response = h.response({
+            status: "fail",
+            message: "Buku gagal dihapus. Id tidak ditemukan",
+        }).code(404);
+
+        return response;
+    }
+
+    books.splice(bookIndex, 1);
+    const response = h.response({
+        status: "success",
+        message: "Buku berhasil dihapus",
+    }).code(200);
 
     return response;
 }
@@ -220,5 +264,6 @@ module.exports = {
     addBookHandler,
     getAllBooksHandler,
     getBookByIdHandler,
-    updateBookByIdHandler
+    updateBookByIdHandler,
+    deleteBookByIdHandler
 };
